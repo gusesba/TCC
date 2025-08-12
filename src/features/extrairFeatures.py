@@ -4,7 +4,7 @@ import pandas as pd
 import librosa
 from tqdm import tqdm
 
-from src.features.extractor import FeatureExtractor
+from extractor import FeatureExtractor
 
 if __name__ == "__main__":
     # Caminho base
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     final_df = final_df[cols]
 
     # Salva em CSV
-    final_df.to_csv("features_participantes.csv", index=False)
+    final_df.to_csv("data_processed/features_participantes.csv", index=False)
 
     print("Extração concluída. Arquivo salvo em features_participantes.csv.")
 
