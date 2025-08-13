@@ -15,11 +15,11 @@ df = df.loc[:, df.nunique() > 1]
 df = df.select_dtypes(include=[np.number])
 
 # Separa features e alvo
-if "class" not in df.columns:
-    raise ValueError("A coluna 'class' não foi encontrada no dataset.")
+if "Class" not in df.columns:
+    raise ValueError("A coluna 'Class' não foi encontrada no dataset.")
 
-X = df.drop(columns=["class"])
-y = df["class"]
+X = df.drop(columns=["Class"])
+y = df["Class"]
 
 # Correlação feature-classe
 def compute_feature_class_correlations(X, y):
@@ -83,5 +83,5 @@ selected_features, final_merit = best_first_search(X, y)
 print("Melhores features:", selected_features)
 print("Mérito final:", final_merit)
 
-df = df[selected_features + ["class"]]
+df = df[selected_features + ["Class"]]
 df.to_csv(os.path.join("data_processed", "best_features.csv"), index=False)
