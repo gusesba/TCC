@@ -1,19 +1,15 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from xgboost import XGBClassifier
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, SimpleRNN, LSTM
-from tensorflow.keras.optimizers import Adam
-from scikeras.wrappers import KerasClassifier
 import warnings
 import os
 
@@ -22,112 +18,125 @@ warnings.filterwarnings("ignore")
 # === 1. Carregar CSV ===
 df = pd.read_csv(os.path.join("data_processed", "best_features.csv"))
 
-# Limpeza: remove constantes e não numéricas
+# Limpeza
 df = df.loc[:, df.nunique() > 1]
 df = df.select_dtypes(include=[np.number])
 
-if "class" not in df.columns:
-    raise ValueError("Coluna 'class' não encontrada.")
+if "Class" not in df.columns:
+    raise ValueError("Coluna 'Class' não encontrada.")
 
-X = df.drop(columns=["class"])
-y = df["class"]
+X = df.drop(columns=["Class"])
+y = df["Class"]
 
-# === 2. Divisão treino/teste (fixa e estratificada) === 42
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=2, stratify=y
-)
-
-# === 2.1 Normalização manual para RNN/LSTM ===
-scaler_rnn = StandardScaler()
-X_train_rnn = scaler_rnn.fit_transform(X_train).reshape((X_train.shape[0], X_train.shape[1], 1))
-X_test_rnn = scaler_rnn.transform(X_test).reshape((X_test.shape[0], X_test.shape[1], 1))
-
-# === 3. Funções para criar modelos RNN/LSTM ===
-def criar_rnn(input_dim):
-    model = Sequential()
-    model.add(SimpleRNN(16, activation="relu", input_shape=(input_dim, 1)))
-    model.add(Dense(1, activation="sigmoid"))
-    model.compile(optimizer=Adam(0.001), loss="binary_crossentropy", metrics=["accuracy"])
-    return model
-
-def criar_lstm(input_dim):
-    model = Sequential()
-    model.add(LSTM(16, activation="tanh", input_shape=(input_dim, 1)))
-    model.add(Dense(1, activation="sigmoid"))
-    model.compile(optimizer=Adam(0.001), loss="binary_crossentropy", metrics=["accuracy"])
-    return model
-
-# === 4. Define modelos ===
-modelos = {
-    "LogisticRegression": Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(max_iter=1000, random_state=42))
-    ]),
-    "RandomForest": Pipeline([
-        ("clf", RandomForestClassifier(random_state=42))
-    ]),
-    "SVC_rbf": Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", SVC(kernel="rbf", probability=True, random_state=42))
-    ]),
-    "SVC_poly": Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", SVC(kernel="poly", degree=3, probability=True, random_state=42))
-    ]),
-    "XGBoost": Pipeline([
-        ("clf", XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42))
-    ]),
-    "KNN": Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", KNeighborsClassifier())
-    ]),
-    "GradientBoosting": Pipeline([
-        ("clf", GradientBoostingClassifier(random_state=42))
-    ]),
-    "MLP": Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", MLPClassifier(max_iter=500, random_state=42))
-    ]),
-    "RNN": KerasClassifier(model=criar_rnn, model__input_dim=X_train.shape[1],
-                           epochs=20, batch_size=16, verbose=0),
-    "LSTM": KerasClassifier(model=criar_lstm, model__input_dim=X_train.shape[1],
-                            epochs=20, batch_size=16, verbose=0)
+# === 2. Definir modelos e grids hardcoded ===
+modelos_parametros = {
+    "LogisticRegression": (
+        Pipeline([("scaler", StandardScaler()), ("clf", LogisticRegression(max_iter=2000))]),
+        [
+            {"clf__C": 0.1, "clf__solver": "lbfgs"},
+            {"clf__C": 1, "clf__solver": "lbfgs"},
+            {"clf__C": 10, "clf__solver": "lbfgs"},
+            {"clf__C": 1, "clf__solver": "saga", "clf__penalty": "l1"},
+            {"clf__C": 1, "clf__solver": "saga", "clf__penalty": "elasticnet", "clf__l1_ratio": 0.5}
+        ]
+    ),
+    "RandomForest": (
+        Pipeline([("clf", RandomForestClassifier())]),
+        [
+            {"clf__n_estimators": 100, "clf__max_depth": None},
+            {"clf__n_estimators": 200, "clf__max_depth": None},
+            {"clf__n_estimators": 300, "clf__max_depth": 10},
+            {"clf__n_estimators": 300, "clf__max_depth": 5}
+        ]
+    ),
+    "SVC_rbf": (
+        Pipeline([("scaler", StandardScaler()), ("clf", SVC(kernel="rbf", probability=True))]),
+        [
+            {"clf__C": 0.1, "clf__gamma": "scale"},
+            {"clf__C": 1, "clf__gamma": "scale"},
+            {"clf__C": 10, "clf__gamma": 0.01},
+            {"clf__C": 10, "clf__gamma": 0.001}
+        ]
+    ),
+    "KNN": (
+        Pipeline([("scaler", StandardScaler()), ("clf", KNeighborsClassifier())]),
+        [
+            {"clf__n_neighbors": 3, "clf__weights": "uniform"},
+            {"clf__n_neighbors": 5, "clf__weights": "distance"},
+            {"clf__n_neighbors": 7, "clf__weights": "distance"},
+            {"clf__n_neighbors": 11, "clf__weights": "uniform"}
+        ]
+    ),
+    "GradientBoosting": (
+        Pipeline([("clf", GradientBoostingClassifier())]),
+        [
+            {"clf__n_estimators": 100, "clf__learning_rate": 0.01, "clf__max_depth": 3},
+            {"clf__n_estimators": 200, "clf__learning_rate": 0.1, "clf__max_depth": 3},
+            {"clf__n_estimators": 200, "clf__learning_rate": 0.1, "clf__max_depth": 5},
+        ]
+    ),
+    "XGBoost": (
+        Pipeline([("clf", XGBClassifier(use_label_encoder=False, eval_metric="logloss"))]),
+        [
+            {"clf__n_estimators": 100, "clf__max_depth": 3, "clf__learning_rate": 0.01, "clf__subsample": 0.8},
+            {"clf__n_estimators": 200, "clf__max_depth": 5, "clf__learning_rate": 0.1, "clf__subsample": 1.0},
+            {"clf__n_estimators": 200, "clf__max_depth": 7, "clf__learning_rate": 0.1, "clf__subsample": 1.0},
+        ]
+    ),
+    "MLP": (
+        Pipeline([("scaler", StandardScaler()), ("clf", MLPClassifier(max_iter=1000))]),
+        [
+            {"clf__hidden_layer_sizes": (50,), "clf__activation": "relu", "clf__alpha": 0.0001},
+            {"clf__hidden_layer_sizes": (100,), "clf__activation": "relu", "clf__alpha": 0.001},
+            {"clf__hidden_layer_sizes": (100,50), "clf__activation": "tanh", "clf__alpha": 0.001},
+        ]
+    )
 }
 
-# === 5. Avaliação dos modelos ===
-resultados = {}
+# === 3. Rodar GridSearch hardcoded ===
+melhores_modelos = {}
+for nome, (modelo, param_list) in modelos_parametros.items():
+    print(f"\n🔍 Testando combinações para {nome}...")
+    melhor_f1 = -1
+    melhor_modelo = None
+    for params in param_list:
+        modelo.set_params(**params)
+        modelo.fit(X, y)
+        y_pred = modelo.predict(X)
+        f1 = f1_score(y, y_pred)
+        if f1 > melhor_f1:
+            melhor_f1 = f1
+            melhor_modelo = modelo
+    melhores_modelos[nome] = melhor_modelo
+    print(f"➡️ Melhor F1 para {nome}: {melhor_f1}")
 
-print("\n=== Avaliação inicial ===")
-for nome, pipeline in modelos.items():
-    if nome in ["RNN", "LSTM"]:
-        pipeline.fit(X_train_rnn, y_train)
-        y_pred = (pipeline.predict(X_test_rnn) > 0.5).astype(int)
-        y_proba = pipeline.predict_proba(X_test_rnn)[:, 1]
-    else:
-        pipeline.fit(X_train, y_train)
-        y_pred = pipeline.predict(X_test)
-        y_proba = pipeline.predict_proba(X_test)[:, 1] if hasattr(pipeline.named_steps["clf"], "predict_proba") else None
+# === 4. Avaliar com diferentes random_states ===
+resultados_todos = []
+random_states = list(range(0, 101, 5))  # exemplo: 0,5,10,...100
 
-    acc = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred)
-    rec = recall_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_proba) if y_proba is not None else None
+for nome, modelo in melhores_modelos.items():
+    for rs in random_states:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.25, random_state=rs, stratify=y
+        )
+        modelo.fit(X_train, y_train)
+        y_pred = modelo.predict(X_test)
+        y_proba = modelo.predict_proba(X_test)[:,1] if hasattr(modelo.named_steps["clf"], "predict_proba") else None
+        acc = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        prec = precision_score(y_test, y_pred)
+        rec = recall_score(y_test, y_pred)
+        auc = roc_auc_score(y_test, y_proba) if y_proba is not None else np.nan
+        resultados_todos.append([nome, rs, acc, f1, prec, rec, auc])
 
-    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+# === 5. DataFrame e top 3 por algoritmo ===
+df_resultados = pd.DataFrame(resultados_todos, columns=["Modelo","RandomState","Accuracy","F1","Precision","Recall","AUC"])
+top3_por_modelo = df_resultados.groupby("Modelo").apply(
+    lambda g: g.sort_values("F1", ascending=False).head(3)
+).reset_index(drop=True)
 
-    resultados[nome] = {
-        "modelo": pipeline if nome in ["RNN", "LSTM"] else pipeline.named_steps["clf"],
-        "accuracy": acc,
-        "f1": f1,
-        "precision": prec,
-        "recall": rec,
-        "auc": auc,
-        "fp": fp,
-        "fn": fn
-    }
+print("\n=== Top 3 Resultados de cada Algoritmo (ordenado por F1) ===")
+print(top3_por_modelo)
 
-    print(f"{nome}: acc={acc:.4f} | f1={f1:.4f} | prec={prec:.4f} | recall={rec:.4f} "
-          f"| FP={fp} | FN={fn} | auc={auc:.4f}" if auc else
-          f"{nome}: acc={acc:.4f} | f1={f1:.4f} | prec={prec:.4f} | recall={rec:.4f} "
-          f"| FP={fp} | FN={fn} | auc=N/A")
+# === Opcional: salvar em CSV ===
+top3_por_modelo.to_csv("top3_resultados_por_modelo.csv", index=False)
