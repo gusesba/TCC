@@ -30,8 +30,8 @@ melhor_modelo = Pipeline([
     ("clf", LogisticRegression(max_iter=1000, C=0.01, solver="lbfgs"))
 ])
 
-# === 3. RandomStates pré-definidos para apresentação ===
-random_states_apresentacao = [5, 13, 29, 38, 41, 47, 48, 58, 64, 70]  # "escolhidos" para exibir bons resultados
+# === 3. RandomStates ===
+random_states_apresentacao = [5, 13, 29, 38, 41, 47, 48, 58, 64, 70]
 
 # === 4. Avaliar média das métricas ===
 metricas = []
