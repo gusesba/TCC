@@ -59,14 +59,86 @@ modelos_parametros = {
         ]
     ),
     "KNN": (
-        Pipeline([("scaler", StandardScaler()), ("clf", KNeighborsClassifier())]),
-        [
-            {"clf__n_neighbors": 3, "clf__weights": "uniform"},
-            {"clf__n_neighbors": 5, "clf__weights": "distance"},
-            {"clf__n_neighbors": 7, "clf__weights": "distance"},
-            {"clf__n_neighbors": 11, "clf__weights": "uniform"}
-        ]
-    ),
+    Pipeline([("scaler", StandardScaler()), ("clf", KNeighborsClassifier())]),
+    [
+        # Euclidean
+        {"clf__n_neighbors": 3,  "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 3,  "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 5,  "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 5,  "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 7,  "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 7,  "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 11, "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 11, "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 15, "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 15, "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 21, "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 21, "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 25, "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 25, "clf__weights": "distance", "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 30, "clf__weights": "uniform",  "clf__metric": "euclidean"},
+        {"clf__n_neighbors": 30, "clf__weights": "distance", "clf__metric": "euclidean"},
+
+        # Manhattan
+        {"clf__n_neighbors": 3,  "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 3,  "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 5,  "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 5,  "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 7,  "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 7,  "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 11, "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 11, "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 15, "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 15, "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 21, "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 21, "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 25, "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 25, "clf__weights": "distance", "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 30, "clf__weights": "uniform",  "clf__metric": "manhattan"},
+        {"clf__n_neighbors": 30, "clf__weights": "distance", "clf__metric": "manhattan"},
+
+        # Minkowski (p=1 e p=2)
+        {"clf__n_neighbors": 3,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 3,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 3,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 3,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 5,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 5,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 5,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 5,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 7,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 7,  "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 7,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 7,  "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 11, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 11, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 11, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 11, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 15, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 15, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 15, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 15, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 21, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 21, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 21, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 21, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 25, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 25, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 25, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 25, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+
+        {"clf__n_neighbors": 30, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 30, "clf__weights": "uniform",  "clf__metric": "minkowski", "clf__p": 2},
+        {"clf__n_neighbors": 30, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 1},
+        {"clf__n_neighbors": 30, "clf__weights": "distance", "clf__metric": "minkowski", "clf__p": 2},
+    ]
+),
     "GradientBoosting": (
         Pipeline([("clf", GradientBoostingClassifier())]),
         [
