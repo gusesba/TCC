@@ -58,5 +58,3 @@ if __name__ == "__main__":
     final_df.to_csv("data_processed/features_participantes.csv", index=False)
 
     print("Extração concluída. Arquivo salvo em features_participantes.csv.")
-
-    

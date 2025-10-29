@@ -10,7 +10,8 @@ import dask.dataframe as dd
 class FeatureExtractor:
     def __init__(self, default_fc_parameters: dict = None):
         if default_fc_parameters is None:
-            self.fc_parameters = EfficientFCParameters()
+            #self.fc_parameters = EfficientFCParameters()
+            self.fc_parameters = MinimalFCParameters()
         else:
             self.fc_parameters = default_fc_parameters
 
