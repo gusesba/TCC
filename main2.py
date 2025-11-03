@@ -32,32 +32,32 @@ y = df["Class"]
 modelos = {
     "LogisticRegression": Pipeline([
         ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(max_iter=1000, random_state=42))
+        ("clf", LogisticRegression(max_iter=1000, random_state=43))
     ]),
     "RandomForest": Pipeline([
-        ("clf", RandomForestClassifier(random_state=42))
+        ("clf", RandomForestClassifier(random_state=43))
     ]),
     "SVC_rbf": Pipeline([
         ("scaler", StandardScaler()),
-        ("clf", SVC(kernel="rbf", probability=True, random_state=42))
+        ("clf", SVC(kernel="rbf", probability=True, random_state=43))
     ]),
     "SVC_poly": Pipeline([
         ("scaler", StandardScaler()),
-        ("clf", SVC(kernel="poly", degree=3, probability=True, random_state=42))
+        ("clf", SVC(kernel="poly", degree=3, probability=True, random_state=43))
     ]),
     "XGBoost": Pipeline([
-        ("clf", XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42))
+        ("clf", XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=43))
     ]),
     "KNN": Pipeline([
         ("scaler", StandardScaler()),
         ("clf", KNeighborsClassifier())
     ]),
     "GradientBoosting": Pipeline([
-        ("clf", GradientBoostingClassifier(random_state=42))
+        ("clf", GradientBoostingClassifier(random_state=43))
     ]),
     "MLP": Pipeline([
         ("scaler", StandardScaler()),
-        ("clf", MLPClassifier(max_iter=500, random_state=42))
+        ("clf", MLPClassifier(max_iter=500, random_state=43))
     ])
 }
 
@@ -83,14 +83,17 @@ for nome, modelo in modelos.items():
         rec = recall_score(y_test, y_pred)
         auc = roc_auc_score(y_test, y_proba) if y_proba is not None else np.nan
 
-        resultados.append([acc, f1, prec, rec, auc])
+        tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+
+        resultados.append([acc, f1, prec, rec, auc, tn, fp, fn, tp])
+
 
     # Média das métricas
     medias = np.nanmean(resultados, axis=0)
     resultados_finais.append([nome] + list(medias))
 
 # === 4. DataFrame com médias ===
-df_medias = pd.DataFrame(resultados_finais, columns=["Modelo", "Accuracy", "F1", "Precision", "Recall", "AUC"])
+df_medias = pd.DataFrame(resultados_finais, columns=["Modelo", "Accuracy", "F1", "Precision", "Recall", "AUC", "TN", "FP", "FN", "TP"])
 
 print("\n=== Médias das métricas para random_state 0 a 100 ===")
 print(df_medias)

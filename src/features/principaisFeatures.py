@@ -6,7 +6,7 @@ from itertools import combinations
 from queue import PriorityQueue
 
 # Carrega o CSV
-df = pd.read_csv(os.path.join("data_processed", "dados_completos.csv"))
+df = pd.read_csv(os.path.join("data_processed", "dados_completos_divididos.csv"))
 
 # Remove colunas constantes (sem variabilidade)
 df = df.loc[:, df.nunique() > 1]
@@ -84,4 +84,4 @@ print("Melhores features:", selected_features)
 print("Mérito final:", final_merit)
 
 df = df[selected_features + ["Class"]]
-df.to_csv(os.path.join("data_processed", "best_features.csv"), index=False)
+df.to_csv(os.path.join("data_processed", "best_features_divididos2.csv"), index=False)
