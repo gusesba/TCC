@@ -16,7 +16,7 @@ import os
 warnings.filterwarnings("ignore")
 
 # === 1. Carregar CSV ===
-df = pd.read_csv(os.path.join("data_processed", "best_features.csv"))
+df = pd.read_csv(os.path.join("data_processed", "best_features_divididos.csv"))
 
 # Limpeza: remove constantes e não numéricas
 df = df.loc[:, df.nunique() > 1]
